@@ -2,20 +2,58 @@
 //
 
 #include "pch.h"
-#include <iostream>
+#include<opencv2/opencv.hpp>
+#include<iostream>
+using namespace std;
+using namespace cv;
+
+
+void greenChannel(Mat img) {
+
+}
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+	Mat src = imread("teste/IDRiD_01.jpg");
+	
+	if (!src.data){
+		cout << "Não foi possível abrir ou encontrar a imagem";
+		return -1;
+	}
+	
+
+
+		
+
+		Mat bgr[3];   //destination array
+		split(src, bgr);//fonte dividida  
+
+		//Note: OpenCV uses BGR color order
+		imwrite("blue.png", bgr[0]); //blue channel
+		imwrite("green.png", bgr[1]); //green channel
+		imwrite("red.png", bgr[2]); //red channel
+
+
+
+		Mat blue = imread("blue.png");
+		namedWindow("blue", WINDOW_NORMAL);
+		imshow("blue", blue);
+
+
+
+		//imshow("blue.png", bgr[0]);
+		Mat green = imread("green.png");
+		namedWindow("green", WINDOW_NORMAL);
+		imshow("green",green);
+		//imshow("red.png", bgr[2]);
+
+		
+		Mat red = imread("red.png");
+		namedWindow("red", WINDOW_NORMAL);
+		imshow("red", red);
+
+		
+	
+	waitKey(0);
+	return 0;
 }
-
-// Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
-// Depurar programa: F5 ou menu Depurar > Iniciar Depuração
-
-// Dicas para Começar: 
-//   1. Use a janela do Gerenciador de Soluções para adicionar/gerenciar arquivos
-//   2. Use a janela do Team Explorer para conectar-se ao controle do código-fonte
-//   3. Use a janela de Saída para ver mensagens de saída do build e outras mensagens
-//   4. Use a janela Lista de Erros para exibir erros
-//   5. Ir Para o Projeto > Adicionar Novo Item para criar novos arquivos de código, ou Projeto > Adicionar Item Existente para adicionar arquivos de código existentes ao projeto
-//   6. No futuro, para abrir este projeto novamente, vá para Arquivo > Abrir > Projeto e selecione o arquivo. sln
