@@ -7,9 +7,21 @@
 using namespace std;
 using namespace cv;
 
+//Abre o imagem mostrando apenas canal verde
+Mat greenChannel(Mat img) {
 
-void greenChannel(Mat img) {
+	Mat bgr[3];   //destination array
+	split(img, bgr);//fonte dividida  
 
+	//Note: OpenCV uses BGR color order
+	imwrite("green.png", bgr[1]); //green channel
+
+
+	Mat green = imread("green.png");
+	/*namedWindow("green", WINDOW_NORMAL);
+	imshow("green", green);*/
+
+	return green;
 }
 
 int main()
@@ -20,39 +32,11 @@ int main()
 		cout << "Não foi possível abrir ou encontrar a imagem";
 		return -1;
 	}
+
 	
-
-
-		
-
-		Mat bgr[3];   //destination array
-		split(src, bgr);//fonte dividida  
-
-		//Note: OpenCV uses BGR color order
-		imwrite("blue.png", bgr[0]); //blue channel
-		imwrite("green.png", bgr[1]); //green channel
-		imwrite("red.png", bgr[2]); //red channel
-
-
-
-		Mat blue = imread("blue.png");
-		namedWindow("blue", WINDOW_NORMAL);
-		imshow("blue", blue);
-
-
-
-		//imshow("blue.png", bgr[0]);
-		Mat green = imread("green.png");
-		namedWindow("green", WINDOW_NORMAL);
-		imshow("green",green);
-		//imshow("red.png", bgr[2]);
-
-		
-		Mat red = imread("red.png");
-		namedWindow("red", WINDOW_NORMAL);
-		imshow("red", red);
-
-		
+	//Abre o imagem mostrando apenas canal verde
+	namedWindow("green", WINDOW_NORMAL);
+	imshow("green", greenChannel(src));
 	
 	waitKey(0);
 	return 0;
