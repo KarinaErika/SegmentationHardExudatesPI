@@ -264,6 +264,18 @@ int main(){
 
 	//src = claheGO(src, 4);
 
+
+	//Teste mediana
+	//https://docs.opencv.org/3.1.0/d4/d13/tutorial_py_filtering.html
+	//https://docs.opencv.org/2.4/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
+	/*
+	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2)
+	{
+		medianBlur(src, dst, i);
+		if (display_dst(DELAY_BLUR) != 0) { return 0; }
+	}
+	median = cv2.medianBlur(img, 5)*/
+
 	//Teste CLAHE
 	Mat m = imread("teste/lena.jpg", IMREAD_GRAYSCALE); //input image
 	imshow("lena_GRAYSCALE", m);
