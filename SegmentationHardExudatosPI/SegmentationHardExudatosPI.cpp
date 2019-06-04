@@ -60,15 +60,15 @@ Mat rgbForHSL(Mat img) {
 	Mat bgr[3];   //destination array
 	split(hsl, bgr);//fonte dividida  
 
-	imwrite("green.png", bgr[1]); //
+	imwrite("canalL.png", bgr[1]); //
 
-	Mat green = imread("green.png", IMREAD_GRAYSCALE);
-	//Abre o imagem mostrando apenas canal verde
-	namedWindow("green", WINDOW_NORMAL);
-	imshow("green", green);
+	//Mat green = imread("green.png", IMREAD_GRAYSCALE);
+	////Abre o imagem mostrando apenas canal verde
+	//namedWindow("green", WINDOW_NORMAL);
+	//imshow("green", green);
 
-	namedWindow("hsl", WINDOW_NORMAL);
-	imshow("hsl", hsl);
+	namedWindow("canalL", WINDOW_NORMAL);
+	imshow("canalL", bgr[1]);
 
 
 	//cv::Mat hslChannels[3];
@@ -76,7 +76,7 @@ Mat rgbForHSL(Mat img) {
 
 	//Mat Lchannel = hsl[:, : , 1];
 	
-	return green;
+	return bgr[1];
 	
 	
 	
@@ -245,6 +245,27 @@ Mat claheGO(Mat src, int _step)
 	}
 	return CLAHE_GO;
 }
+
+
+//Contrat streching 
+//https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
+//https://theailearner.com/2019/01/30/contrast-stretching/
+int computeOutput(int x, int r1, int s1, int r2, int s2)
+{
+	float result;
+	if (0 <= x && x <= r1) {
+		result = (float) s1 / r1 * x;
+	}
+	else if (r1 < x && x <= r2) {
+		result = (float) ((s2 - s1) / (r2 - r1)) * (x - r1) + s1;
+	}
+	else if (r2 < x && x <= 255) {
+		result = (float) ((255 - s2) / (255 - r2)) * (x - r2) + s2;
+	}
+	return (int) result;
+}
+
+
 int main(){
 	
 	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_02.jpg");
@@ -262,7 +283,7 @@ int main(){
 
 	//src = rgbForHSL(src);
 
-	//src = claheGO(src, 4);
+	//src = claheGO(src, 1);
 
 
 	//Teste mediana
@@ -277,21 +298,39 @@ int main(){
 	median = cv2.medianBlur(img, 5)*/
 
 	//Teste CLAHE
-	Mat m = imread("teste/lena.jpg", IMREAD_GRAYSCALE); //input image
-	imshow("lena_GRAYSCALE", m);
+	Mat m = imread("teste/hslbandl.jpg", IMREAD_GRAYSCALE); //input image
+	Mat dst;
+	m.copyTo(dst);
+	imshow("hslbandl_original", m);
 
 	Ptr<CLAHE> clahe = createCLAHE();
-	clahe->setClipLimit(4);
+	clahe->setClipLimit(1);
 
-	Mat dst;
+	
+	//Mat new_image = dst.clone();
 	clahe->apply(m, dst);
-	imshow("lena_CLAHE", dst);
+	namedWindow("clare", WINDOW_NORMAL);
+	imshow("clare", dst);
 
 	//Fim teste CLAHE
 
+	Mat new_image;
+	m.copyTo(new_image);
 
-	namedWindow("clare", WINDOW_NORMAL);
-	imshow("clare", src);
+	for (int y = 0; y < dst.rows; y++) {
+		for (int x = 0; x < dst.cols; x++) {
+			
+				int output = computeOutput(dst.at<uchar>(y, x), 70, 0, 140, 255);
+				new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
+			
+		}
+	}
+
+
+	//dst = histogramaDeStretching(dst);
+
+	namedWindow("Stretching", WINDOW_NORMAL);
+	imshow("Stretching", new_image);
 
 	//src = greenChannelExtraction(src);
 	
