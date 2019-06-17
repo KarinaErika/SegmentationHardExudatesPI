@@ -24,6 +24,7 @@ Mat greenChannelExtraction(Mat img) {
 	//Abre o imagem mostrando apenas canal verde
 	namedWindow("green", WINDOW_NORMAL);
 	imshow("green", green);
+	imwrite("resultado/Canal verde - exudatos.jpg", green); //Salva a imagem
 
 	return green;
 	
@@ -43,56 +44,82 @@ Mat complementOperation(Mat img) {
 	}
 	namedWindow("Complemento", WINDOW_NORMAL);
 	imshow("Complemento", img);
+	imwrite("resultado/Complemento - exudatos.jpg", img); //Salva a imagem
+
 
 	return img;
 
 }
 
-
 //Seguimentar disco ópitico
 //1° Conversão RGB para HSL;
-Mat rgbForHSL(Mat img) {
+//Mat rgbForHSL(Mat img) {
+//
+//	Mat hsl;
+//
+//	cvtColor(img, hsl, COLOR_RGB2HLS);  
+//
+//	Mat bgr[3];   //destination array
+//	split(hsl, bgr);//fonte dividida  
+//
+//	imwrite("canalL.png", bgr[1]); //
+//
+//	Mat green = imread("green.png", IMREAD_GRAYSCALE);
+//	////Abre o imagem mostrando apenas canal verde
+//	//namedWindow("green", WINDOW_NORMAL);
+//	//imshow("green", green);
+//
+//	namedWindow("canalL", WINDOW_NORMAL);
+//	imshow("canalL", bgr[2]);
+//	imwrite("resultado/rgbForHSLCanalVerde.jpg", bgr[2]); //Salva a imagem
+//
+//
+//	//cv::Mat hslChannels[3];
+//	//cv::split(hsl, hslChannels);
+//
+//	//Mat Lchannel = hsl[:, : , 1];
+//	
+//	return bgr[2];
+//	
+//	
+//	
+//	//cv::COLOR_RGB2GRAY
+//	//cvtColor(image, gray, cv::COLOR_RGB2HLS); // cv::COLOR_RGB2GRAY
+//
+//	/*
+//	cv::Mat src;
+//	cv::Mat hsl;
+//
+//	cv::cvtColor(srcRgba, src, CV_RGBA2RGB);
+//	cv::cvtColor(src, hsl, CV_RGB2HLS);
+//
+//	cv::Mat hslChannels[3];
+//	cv::split(hsl, hslChannels);
+//	*/
+//}
+
+Mat rgbForHSLAndLBand(Mat img) {
 
 	Mat hsl;
 
-	cvtColor(img, hsl, COLOR_RGB2HLS);  
+	cvtColor(img, hsl, COLOR_RGB2HLS);
 
 	Mat bgr[3];   //destination array
 	split(hsl, bgr);//fonte dividida  
 
-	imwrite("canalL.png", bgr[1]); //
+	imwrite("green.png", bgr[1]); //
 
-	//Mat green = imread("green.png", IMREAD_GRAYSCALE);
-	////Abre o imagem mostrando apenas canal verde
-	//namedWindow("green", WINDOW_NORMAL);
-	//imshow("green", green);
+	Mat green = imread("green.png", IMREAD_GRAYSCALE);
+	//Abre o imagem mostrando apenas canal verde
+	namedWindow("green", WINDOW_NORMAL);
+	imshow("green", green);
 
-	namedWindow("canalL", WINDOW_NORMAL);
-	imshow("canalL", bgr[1]);
+	namedWindow("hsl", WINDOW_NORMAL);
+	imshow("hsl", hsl);
+	imwrite("resultado/removal of OD/rgbForHSLCanalVerde.jpg", bgr[1]); //Salva a imagem
 
+	return hsl;
 
-	//cv::Mat hslChannels[3];
-	//cv::split(hsl, hslChannels);
-
-	//Mat Lchannel = hsl[:, : , 1];
-	
-	return bgr[1];
-	
-	
-	
-	//cv::COLOR_RGB2GRAY
-	//cvtColor(image, gray, cv::COLOR_RGB2HLS); // cv::COLOR_RGB2GRAY
-
-	/*
-	cv::Mat src;
-	cv::Mat hsl;
-
-	cv::cvtColor(srcRgba, src, CV_RGBA2RGB);
-	cv::cvtColor(src, hsl, CV_RGB2HLS);
-
-	cv::Mat hslChannels[3];
-	cv::split(hsl, hslChannels);
-	*/
 }
 
 //2° CLARE
@@ -246,7 +273,6 @@ Mat claheGO(Mat src, int _step)
 	return CLAHE_GO;
 }
 
-
 //Contrat streching 
 //https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
 //https://theailearner.com/2019/01/30/contrast-stretching/
@@ -265,6 +291,52 @@ int computeOutput(int x, int r1, int s1, int r2, int s2)
 	return (int) result;
 }
 
+Mat clahe(Mat img) {
+
+	img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
+	//img.copyTo(resultado);
+
+	Ptr<CLAHE> clahe = createCLAHE();
+	clahe->setClipLimit(4);
+
+	Mat resultado;
+
+	clahe->apply(img, resultado);
+	imshow("CLAHE - OD", resultado);
+	imwrite("resultado/removal of OD/CLAHE - OD.jpg", resultado); //Salva a imagem
+
+	return resultado;
+}
+
+Mat deteopticalDiscDetection(Mat img) {
+	img = rgbForHSLAndLBand(img); //1° Converter para HSL e extrair banda L
+	img = clahe(img); //2° Aplicar CLAHE 
+
+	Mat new_image;
+	img.copyTo(new_image);
+
+	//3° Contrast Stretching
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+
+			int output = computeOutput(img.at<uchar>(y, x), 70, 0, 140, 255);
+			new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
+
+		}
+	}
+
+
+	namedWindow("Contrast Stretching", WINDOW_NORMAL);
+	imshow("Contrast Stretching", new_image);
+	imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
+
+	
+	//4° Filtro da mediana
+	//5° Radius enlargement
+
+	return new_image;
+
+}
 
 int main(){
 	
@@ -275,66 +347,13 @@ int main(){
 		return -1;
 	}
 
-	namedWindow("original", WINDOW_NORMAL);
-	imshow("original", src);
+	deteopticalDiscDetection(src);
 
-	//Seguimentar disco ópitico
-	//1° Conversão RGB para HSL;
+	/*src = greenChannelExtraction(src);
+	src = complementOperation(src);*/
 
-	//src = rgbForHSL(src);
-
-	//src = claheGO(src, 1);
-
-
-	//Teste mediana
-	//https://docs.opencv.org/3.1.0/d4/d13/tutorial_py_filtering.html
-	//https://docs.opencv.org/2.4/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
-	/*
-	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2)
-	{
-		medianBlur(src, dst, i);
-		if (display_dst(DELAY_BLUR) != 0) { return 0; }
-	}
-	median = cv2.medianBlur(img, 5)*/
-
-	//Teste CLAHE
-	Mat m = imread("teste/hslbandl.jpg", IMREAD_GRAYSCALE); //input image
-	Mat dst;
-	m.copyTo(dst);
-	imshow("hslbandl_original", m);
-
-	Ptr<CLAHE> clahe = createCLAHE();
-	clahe->setClipLimit(1);
 
 	
-	//Mat new_image = dst.clone();
-	clahe->apply(m, dst);
-	namedWindow("clare", WINDOW_NORMAL);
-	imshow("clare", dst);
-
-	//Fim teste CLAHE
-
-	Mat new_image;
-	m.copyTo(new_image);
-
-	for (int y = 0; y < dst.rows; y++) {
-		for (int x = 0; x < dst.cols; x++) {
-			
-				int output = computeOutput(dst.at<uchar>(y, x), 70, 0, 140, 255);
-				new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
-			
-		}
-	}
-
-
-	//dst = histogramaDeStretching(dst);
-
-	namedWindow("Stretching", WINDOW_NORMAL);
-	imshow("Stretching", new_image);
-
-	//src = greenChannelExtraction(src);
-	
-	//src = complementOperation(src);
 
 	waitKey(0);
 	return 0;
