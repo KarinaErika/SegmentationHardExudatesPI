@@ -7,6 +7,9 @@
 using namespace std;
 using namespace cv;
 
+int MAX_KERNEL_LENGTH = 31;
+int DELAY_BLUR = 100;
+
 //1° extração do canal verde: o canal verde contém informações suficientes para detectar exsudatos duros, pois tem o maior contraste entre os outros.
 Mat greenChannelExtraction(Mat img) {
 
@@ -114,11 +117,11 @@ Mat rgbForHSLAndLBand(Mat img) {
 	namedWindow("green", WINDOW_NORMAL);
 	imshow("green", green);
 
-	namedWindow("hsl", WINDOW_NORMAL);
-	imshow("hsl", hsl);
+	/*namedWindow("hsl", WINDOW_NORMAL);
+	imshow("hsl", hsl);*/
 	imwrite("resultado/removal of OD/rgbForHSLCanalVerde.jpg", bgr[1]); //Salva a imagem
 
-	return hsl;
+	return bgr[1];
 
 }
 
@@ -134,13 +137,15 @@ Mat clahe(Mat img) {
 	Mat resultado;
 
 	clahe->apply(img, resultado);
+
+	namedWindow("CLAHE - OD", WINDOW_NORMAL);
 	imshow("CLAHE - OD", resultado);
 	imwrite("resultado/removal of OD/CLAHE - OD.jpg", resultado); //Salva a imagem
 
 	return resultado;
 }
 
-//Contrat streching 
+//3° Contrat streching 
 //https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
 //https://theailearner.com/2019/01/30/contrast-stretching/
 int computeOutput(int x, int r1, int s1, int r2, int s2)
@@ -158,16 +163,71 @@ int computeOutput(int x, int r1, int s1, int r2, int s2)
 	return (int) result;
 }
 
-
-
-Mat medianFiltering(Mat img) {
-	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2)
-	{
-		medianBlur(src, dst, i);
-		if (display_dst(DELAY_BLUR) != 0) { return 0; }
-	}
+int display_dst(int delay){
+	int c = waitKey(delay);
+	if (c >= 0) { return -1; }
+	return 0;
 }
 
+int medianFiltering(Mat imgContratStreching) {
+	Mat resultMedianFiltering;
+
+	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2)
+	{
+		medianBlur(imgContratStreching, resultMedianFiltering, i);
+		if (display_dst(DELAY_BLUR) != 0) { 
+			return 0; 
+		}
+	}
+
+	namedWindow("Median Filtering - OD", WINDOW_NORMAL);
+	imshow("Median Filtering - OD", resultMedianFiltering);
+	imwrite("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", resultMedianFiltering); //Salva a imagem
+
+	return 1;
+}
+
+Mat bynarizationOtsu(Mat imgMedianFiltering) {
+	/*Mat resultBynarizationOtsu;
+	cv::threshold(imgMedianFiltering, resultBynarizationOtsu, 0, 255, THRESH_BINARY | THRESH_OTSU);*/
+
+
+	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
+
+	Mat resultGray, resultBynarizationOtsu;
+	cvtColor(imgMedianFiltering, resultGray, cv::COLOR_RGB2GRAY);
+	threshold(resultGray, resultBynarizationOtsu, 0, 255, THRESH_BINARY);
+	//imwrite("result.jpg", binary);
+
+
+	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
+	imshow("Bynarization Otsu - OD", resultBynarizationOtsu);
+	imwrite("resultado/removal of OD/Bynarization Otsu/Bynarization Otsu - OD.jpg", resultBynarizationOtsu); //Salva a imagem
+
+	return resultBynarizationOtsu;
+}
+
+//3° Contrast Stretching
+Mat contrastStretching(Mat imgCLAHE) {
+
+	Mat new_image;
+	imgCLAHE.copyTo(new_image);
+
+	for (int y = 0; y < imgCLAHE.rows; y++) {
+		for (int x = 0; x < imgCLAHE.cols; x++) {
+
+			int output = computeOutput(imgCLAHE.at<uchar>(y, x), 70, 0, 140, 255);
+			new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
+
+		}
+	}
+
+	namedWindow("Contrast Stretching", WINDOW_NORMAL);
+	imshow("Contrast Stretching", new_image);
+	imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
+
+	return new_image;
+}
 Mat deteopticalDiscDetection(Mat img) {
 	img = rgbForHSLAndLBand(img); //1° Converter para HSL e extrair banda L
 	img = clahe(img); //2° Aplicar CLAHE 
@@ -175,23 +235,25 @@ Mat deteopticalDiscDetection(Mat img) {
 	Mat new_image;
 	img.copyTo(new_image);
 
-	//3° Contrast Stretching
-	for (int y = 0; y < img.rows; y++) {
-		for (int x = 0; x < img.cols; x++) {
-
-			int output = computeOutput(img.at<uchar>(y, x), 70, 0, 140, 255);
-			new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
-
-		}
-	}
+	new_image = contrastStretching(img);
 
 
-	namedWindow("Contrast Stretching", WINDOW_NORMAL);
-	imshow("Contrast Stretching", new_image);
-	imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
+	//namedWindow("Contrast Stretching", WINDOW_NORMAL);
+	//imshow("Contrast Stretching", new_image);
+	//imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
 
 	
 	//4° Filtro da mediana
+	//new_image = medianFiltering(new_image);
+	//namedWindow("medianFiltering", WINDOW_NORMAL);
+	//imshow("medianFiltering", new_image);
+	//imwrite("resultado/removal of OD/bynarizationOtsu.jpg", new_image); //Salva a imagem
+
+	//new_image = bynarizationOtsu(new_image);
+	//namedWindow("bynarizationOtsu", WINDOW_NORMAL);
+	//imshow("bynarizationOtsu", new_image);
+	//imwrite("resultado/removal of OD/bynarizationOtsu.jpg", new_image); //Salva a imagem
+
 	//5° Radius enlargement
 
 	return new_image;
@@ -201,13 +263,26 @@ Mat deteopticalDiscDetection(Mat img) {
 int main(){
 	
 	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_02.jpg");
+	//Mat src = imread("resultado/removal of OD/CLAHE - OD.jpg", IMREAD_GRAYSCALE);
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
 		return -1;
 	}
 
+
+
+
+	//bynarizationOtsu(src);
+
 	deteopticalDiscDetection(src);
+
+	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
+
+	//Mat gray, binary;
+	//cvtColor(theFrame, gray, cv::COLOR_RGB2GRAY);
+	//threshold(gray, binary, 150, 255, THRESH_BINARY);
+	//imwrite("result.jpg", binary);
 
 	/*src = greenChannelExtraction(src);
 	src = complementOperation(src);*/
