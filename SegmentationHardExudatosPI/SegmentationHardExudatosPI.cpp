@@ -169,14 +169,13 @@ int display_dst(int delay){
 	return 0;
 }
 
-int medianFiltering(Mat imgContratStreching) {
+Mat medianFiltering(Mat imgContratStreching) {
 	Mat resultMedianFiltering;
 
-	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2)
-	{
+	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2){
 		medianBlur(imgContratStreching, resultMedianFiltering, i);
 		if (display_dst(DELAY_BLUR) != 0) { 
-			return 0; 
+			break;
 		}
 	}
 
@@ -184,7 +183,8 @@ int medianFiltering(Mat imgContratStreching) {
 	imshow("Median Filtering - OD", resultMedianFiltering);
 	imwrite("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", resultMedianFiltering); //Salva a imagem
 
-	return 1;
+	return resultMedianFiltering;
+	
 }
 
 Mat bynarizationOtsu(Mat imgMedianFiltering) {
@@ -195,8 +195,11 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
 
 	Mat resultGray, resultBynarizationOtsu;
-	cvtColor(imgMedianFiltering, resultGray, cv::COLOR_RGB2GRAY);
-	threshold(resultGray, resultBynarizationOtsu, 0, 255, THRESH_BINARY);
+
+	imgMedianFiltering.copyTo(resultGray);
+	imgMedianFiltering.copyTo(resultBynarizationOtsu);
+	//cvtColor(imgMedianFiltering, resultGray, cv::COLOR_RGB2GRAY);
+	threshold(resultGray, resultBynarizationOtsu, 200, 255, THRESH_BINARY | THRESH_OTSU);
 	//imwrite("result.jpg", binary);
 
 
@@ -228,6 +231,7 @@ Mat contrastStretching(Mat imgCLAHE) {
 
 	return new_image;
 }
+
 Mat deteopticalDiscDetection(Mat img) {
 	img = rgbForHSLAndLBand(img); //1° Converter para HSL e extrair banda L
 	img = clahe(img); //2° Aplicar CLAHE 
@@ -235,21 +239,15 @@ Mat deteopticalDiscDetection(Mat img) {
 	Mat new_image;
 	img.copyTo(new_image);
 
-	new_image = contrastStretching(img);
+	new_image = contrastStretching(img); //3° Contrast Stretching
 
 
-	//namedWindow("Contrast Stretching", WINDOW_NORMAL);
-	//imshow("Contrast Stretching", new_image);
-	//imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
 
-	
 	//4° Filtro da mediana
-	//new_image = medianFiltering(new_image);
-	//namedWindow("medianFiltering", WINDOW_NORMAL);
-	//imshow("medianFiltering", new_image);
-	//imwrite("resultado/removal of OD/bynarizationOtsu.jpg", new_image); //Salva a imagem
+	new_image = medianFiltering(new_image);
 
-	//new_image = bynarizationOtsu(new_image);
+
+	new_image = bynarizationOtsu(new_image);
 	//namedWindow("bynarizationOtsu", WINDOW_NORMAL);
 	//imshow("bynarizationOtsu", new_image);
 	//imwrite("resultado/removal of OD/bynarizationOtsu.jpg", new_image); //Salva a imagem
@@ -262,8 +260,9 @@ Mat deteopticalDiscDetection(Mat img) {
 
 int main(){
 	
-	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_02.jpg");
-	//Mat src = imread("resultado/removal of OD/CLAHE - OD.jpg", IMREAD_GRAYSCALE);
+	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_04.jpg");
+	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
+	Mat src = imread("teste/image008.png", IMREAD_GRAYSCALE);
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
@@ -271,11 +270,12 @@ int main(){
 	}
 
 
+	
+	deteopticalDiscDetection(src);
+
 
 
 	//bynarizationOtsu(src);
-
-	deteopticalDiscDetection(src);
 
 	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
 
