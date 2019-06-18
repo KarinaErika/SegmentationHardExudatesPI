@@ -141,7 +141,7 @@ Mat contrastStreching(Mat imgCLAHE) {
 	Mat imgResultado;
 	imgCLAHE.copyTo(imgResultado);
 
-	int z, valorPixel, contraste;
+	int z, valorPixel, dif;
 
 	int maiorIntensidadeOriginal = maior(imgCLAHE);
 	int menorIntensidadeOriginal = menor(imgCLAHE);
@@ -151,14 +151,14 @@ Mat contrastStreching(Mat imgCLAHE) {
 	maiorIntensidadeOriginal = maior(imgCLAHE);
 	menorIntensidadeOriginal = menor(imgCLAHE);
 
-	contraste = maiorIntensidadeOriginal - menorIntensidadeOriginal;
+	dif = maiorIntensidadeOriginal - menorIntensidadeOriginal;
 
 	for (int row = 0; row < imgCLAHE.rows; row++) {
 		for (int col = 0; col < imgCLAHE.cols; col++) {
 			valorPixel = (int)imgCLAHE.at<uchar>(row, col);
 
 			pixelSubMenor = valorPixel - menorIntensidadeOriginal;
-			contrasteEpixelSub = pixelSubMenor / contraste;
+			contrasteEpixelSub = pixelSubMenor / dif;
 
 			z = 255 * contrasteEpixelSub;
 
