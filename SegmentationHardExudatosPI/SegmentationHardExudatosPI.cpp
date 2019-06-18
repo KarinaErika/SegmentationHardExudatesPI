@@ -136,6 +136,49 @@ Mat clahe(Mat img) {
 	return resultado;
 }
 
+
+//3° Contrat streching 
+//https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
+//https://theailearner.com/2019/01/30/contrast-stretching/
+int computeOutput(int x, int r1, int s1, int r2, int s2)
+{
+	float result;
+	if (0 <= x && x <= r1) {
+		result = (float)s1 / r1 * x;
+	}
+	else if (r1 < x && x <= r2) {
+		result = (float)((s2 - s1) / (r2 - r1)) * (x - r1) + s1;
+	}
+	else if (r2 < x && x <= 255) {
+		result = (float)((255 - s2) / (255 - r2)) * (x - r2) + s2;
+	}
+	return (int)result;
+}
+
+//3° Contrast Stretching
+Mat contrastStretching2(Mat imgCLAHE) {
+
+	Mat new_image;
+	imgCLAHE.copyTo(new_image);
+
+	for (int y = 0; y < imgCLAHE.rows; y++) {
+		for (int x = 0; x < imgCLAHE.cols; x++) {
+
+			int output = computeOutput(imgCLAHE.at<uchar>(y, x), 70, 0, 140, 255);
+			new_image.at<uchar>(y, x) = saturate_cast<uchar>(output);
+
+		}
+	}
+
+	namedWindow("Contrast Stretching", WINDOW_NORMAL);
+	imshow("Contrast Stretching", new_image);
+	imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
+
+	return new_image;
+}
+
+
+
 //3° Contrat streching 
 Mat contrastStreching(Mat imgCLAHE) {
 	Mat imgResultado;
@@ -212,7 +255,7 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 	imgMedianFiltering.copyTo(resultGray);
 	imgMedianFiltering.copyTo(resultBynarizationOtsu);
 	//cvtColor(imgMedianFiltering, resultGray, cv::COLOR_RGB2GRAY);
-	threshold(resultGray, resultBynarizationOtsu, 200, 255, THRESH_BINARY | THRESH_OTSU);
+	threshold(resultGray, resultBynarizationOtsu, 100, 255, THRESH_BINARY | THRESH_OTSU);
 	//imwrite("result.jpg", binary);
 
 
@@ -235,7 +278,7 @@ Mat deteopticalDiscDetection(Mat img) {
 	img.copyTo(new_image);
 
 	//3° Contrast Stretching
-	new_image = contrastStreching(img);
+	new_image = contrastStretching2(img);
 
 	//4° Filtro da mediana
 	new_image = medianFiltering(new_image);
@@ -250,6 +293,83 @@ Mat deteopticalDiscDetection(Mat img) {
 }
 
 
+//Pega maior valor de uma matriz
+int maior1(vector<vector<float>> mat, Mat imgA, Mat imgB) {
+
+	int maior = mat[0][0];
+
+	for (int row = 0; row < imgA.rows; row++) {
+		for (int col = 0; col < imgA.cols; col++) {
+			if (mat[row][col] > maior) {
+				maior = mat[row][col];
+			}
+		}
+	}
+	return maior;
+
+}
+
+//Pega menor valor de uma matriz
+int menor1(vector<vector<float>> mat, Mat imgA, Mat imgB) {
+
+	int menor = mat[0][0];
+
+	for (int row = 0; row < imgA.rows; row++) {
+		for (int col = 0; col < imgA.cols; col++) {
+			if (mat[row][col] < menor) {
+				menor = mat[row][col];
+			}
+		}
+	}
+	return menor;
+}
+
+//Realizar a multiplicação para remover o disco ópitico da imagem
+void multiplicacaoNormalizacao(Mat imgA, Mat imgB) {
+
+	float y;
+	int z;
+
+	y = 350 - 45;
+	z = (255 / y) * (300 - 45);
+
+	Mat imgFinal01;
+	imgA.copyTo(imgFinal01);
+	int k;
+	int maiorValor = 0, menorValor = 0;
+	vector<vector<float>> mat(imgA.rows, vector<float>(imgA.cols));
+
+	//Copia na matriz mat os valores da soma de imgA e imgB
+	for (int row = 0; row < imgA.rows; row++) {
+		for (int col = 0; col < imgA.cols; col++) {
+			k = (int)imgA.at<uchar>(row, col) * (int)imgB.at<uchar>(row, col);
+			if (k = 0)
+				mat[row][col] = (int)imgA.at<uchar>(row, col);
+			else
+				mat[row][col] = k;
+
+		}
+	}
+
+	maiorValor = maior1(mat, imgA, imgB);
+	menorValor = menor1(mat, imgA, imgB);
+
+	y = maiorValor - menorValor;
+	//Faz a normalização
+	for (int row = 0; row < imgA.rows; row++) {
+		for (int col = 0; col < imgA.cols; col++) {
+			z = (255 / y) * (mat[row][col] - menorValor); //Fómula para normalização
+
+			imgFinal01.at<uchar>(row, col) = z;
+		}
+	}
+
+	namedWindow("Normalizacao - multiplicacao", WINDOW_AUTOSIZE);
+	imshow("Normalizacao - multiplicacao", imgFinal01);
+	imwrite("resultado/Normalizacao - multiplicacao.jpg", imgFinal01); //Salva a imagem
+}
+
+
 void mostraAntes(Mat src) {
 	namedWindow("Antes.jpg", WINDOW_AUTOSIZE);
 	imshow("Antes.jpg", src);
@@ -258,20 +378,42 @@ void mostraAntes(Mat src) {
 
 int main(){
 	
-	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_04.jpg");
+	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	//Mat src = imread("teste/usarcontrastenesse.jpg", IMREAD_GRAYSCALE);
+	//Mat src = imread("teste/hslLBandAplicar.jpg", IMREAD_GRAYSCALE);
+
+
+	Mat imgA = imread("teste/IDRiD_01.jpg", IMREAD_GRAYSCALE);
+	Mat imgB = imread("teste/IDRiD_01_OD.tif", IMREAD_GRAYSCALE);
+
+
+	namedWindow("a", WINDOW_NORMAL);
+	imshow("a", imgA);
+
+
+	namedWindow("b", WINDOW_NORMAL);
+	imshow("b", imgB);
+
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
 		return -1;
 	}
 
-	mostraAntes(src);
+	//bynarizationOtsu(imgB);
 
-	deteopticalDiscDetection(src);
+	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
+	imshow("Bynarization Otsu - OD", imgB);
+
+	//mostraAntes(src);
+
+	//deteopticalDiscDetection(src);
 
 	//contrastStreching(src);
+
+	multiplicacaoNormalizacao(imgA, imgB);
+
+
 
 	
 
