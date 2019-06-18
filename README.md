@@ -1,9 +1,9 @@
 # SegmentationHardExudatosPI
 Performs automatic segmentation of hard exudates using the opencv library (developing)
 
-Steps Segmentation of hard exudates [1]
+Steps for Segmentation of hard exudates [1]
 
-1.  Green channel extractetion (ok)
+1. Green channel extractetion (ok)
 2. Complement Operation (ok)
 3. Matched filter
 4. Filtered image
@@ -19,5 +19,7 @@ Steps Segmentation of hard exudates [1]
 [1] Nugroho, Hanung Adi, et al. "Automated segmentation of hard exudates based on matched filtering." 2016 International Seminar on Sensors, Instrumentation, Measurement and Metrology (ISSIMM). IEEE, 2016.
 
 [2] Nugroho, Hanung Adi, et al. "Segmentation of exudates based on high pass filtering in retinal fundus images." 2015 7th International Conference on Information Technology and Electrical Engineering (ICITEE). IEEE, 2015.
+
+For more information about methodology, consult the paste "methodology" this repository.
 
 
