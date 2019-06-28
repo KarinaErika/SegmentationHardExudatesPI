@@ -94,32 +94,33 @@ Mat complementOperation(Mat img) {
 }
 
 //1° rgb para hsl e extrair a banda L
-Mat rgbForHSLAndLBand(Mat img) {
+Mat rgbForHSLAndLBand(Mat img, String img_ext) {
 
+	String imgRgbForHSLAndLBand("resultado/removal of OD/1. Convert To HSL And extracted L Band/rgbForHSLAndLBand_" + img_ext);
 	Mat hsl;
 
 	cvtColor(img, hsl, COLOR_RGB2HLS);
-
 	Mat bgr[3];   //destination array
 	split(hsl, bgr);//fonte dividida  
 
-	imwrite("green.png", bgr[1]); //
+	//Salva a imagem
+	imwrite(imgRgbForHSLAndLBand, bgr[1]); 
 
-	Mat green = imread("green.png", IMREAD_GRAYSCALE);
+	//Salva a imagem em escala de cinza
+	Mat green = imread(imgRgbForHSLAndLBand, IMREAD_GRAYSCALE); 
+
 	//Abre o imagem mostrando apenas canal verde
-	namedWindow("green", WINDOW_NORMAL);
-	imshow("green", green);
+	namedWindow("L Band", WINDOW_NORMAL);
+	imshow("L Band", green);
 
-	/*namedWindow("hsl", WINDOW_NORMAL);
-	imshow("hsl", hsl);*/
-	imwrite("resultado/removal of OD/rgbForHSLAndLBand/rgbForHSLCanalVerde.jpg", bgr[1]); //Salva a imagem
-
-	return bgr[1];
+	return green;
 
 }
 
 //2° CLAHE
-Mat clahe(Mat img) {
+Mat clahe(Mat img, String img_ext) {
+
+	String imgClahe("resultado/removal of OD/2. CLAHE/CLAHE_" + img_ext);
 
 	/*img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
 	img.copyTo(resultado);*/
@@ -138,15 +139,14 @@ Mat clahe(Mat img) {
 
 			namedWindow("CLAHE - OD", WINDOW_NORMAL);
 			imshow("CLAHE - OD", resultado);
-			//String str = "resultado/removal of OD/clahe/CLAHE" << i << "_" << j + ".jpg";
-			imwrite("resultado/removal of OD/clahe/CLAHE.jpg", resultado); //Salva a imagem
+			
+			imwrite(imgClahe, resultado); //Salva a imagem
 		//}
 	//}
 
 
 	return resultado;
 }
-
 
 //3° Contrat streching 
 //https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
@@ -167,11 +167,12 @@ int computeOutput(int x, int r1, int s1, int r2, int s2)
 	return (int)result;
 }
 
-//3° Contrast Stretching
-Mat contrastStreching2(Mat imgCLAHE) {
+//3° Contrast Stretching 2
+Mat contrastStreching2(Mat imgCLAHE, String img_ext) {
 
 	Mat new_image;
 	imgCLAHE.copyTo(new_image);
+	String imgContrastStreching2("resultado/removal of OD/3. Contrast Streching/Contrast Stretching 2/Contrast_Stretching 2_" + img_ext);
 
 	for (int y = 0; y < imgCLAHE.rows; y++) {
 		for (int x = 0; x < imgCLAHE.cols; x++) {
@@ -184,15 +185,15 @@ Mat contrastStreching2(Mat imgCLAHE) {
 
 	namedWindow("Contrast Stretching", WINDOW_NORMAL);
 	imshow("Contrast Stretching", new_image);
-	imwrite("resultado/removal of OD/Contrast streching/Contrast Stretching2.jpg", new_image); //Salva a imagem
+	imwrite(imgContrastStreching2, new_image); //Salva a imagem
 
 	return new_image;
 }
 
-
 //3° Contrat streching 
 Mat contrastStreching(Mat imgCLAHE, String img_ext) {
 	Mat imgResultado = Mat::zeros(imgCLAHE.size(), imgCLAHE.type());
+	String imgContrastStreching("resultado/removal of OD/3. Contrast Streching/Contrast_Stretching_" + img_ext);
 	//imgCLAHE.copyTo(imgResultado);
 
 	int z = 0;
@@ -223,12 +224,9 @@ Mat contrastStreching(Mat imgCLAHE, String img_ext) {
 		}
 	}
 
-	String imgContrastStreching("resultado/removal of OD/Contrast streching/" + img_ext);
-
-	//namedWindow("HistStretching.jpg", WINDOW_NORMAL);
-	//
-	imshow("HistStretching.jpg", imgResultado);
-	//imwrite("resultado/removal of OD/Contrast streching/ContrastStreching.jpg", imgResultado); //Salva a imagem
+	
+	namedWindow("Contrast streching.jpg", WINDOW_NORMAL);
+	imshow("Contrast streching.jpg", imgResultado);
 	imwrite(imgContrastStreching, imgResultado); //Salva a imagem
 
 	return imgResultado;
@@ -241,8 +239,9 @@ int display_dst(int delay){
 }
 
 //4° Filtro da mediana
-Mat medianFiltering(Mat imgContratStreching) {
+Mat medianFiltering(Mat imgContratStreching, String img_ext) {
 	Mat resultMedianFiltering;
+	String imgMedianFiltering("resultado/removal of OD/4. Median Filtering/Median_Filtering_" + img_ext);
 
 	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2){
 		medianBlur(imgContratStreching, resultMedianFiltering, i);
@@ -253,19 +252,21 @@ Mat medianFiltering(Mat imgContratStreching) {
 
 	namedWindow("Median Filtering - OD", WINDOW_NORMAL);
 	imshow("Median Filtering - OD", resultMedianFiltering);
-	imwrite("resultado/removal of OD/Median Filtering/Median Filtering2 - OD.jpg", resultMedianFiltering); //Salva a imagem
+	imwrite(imgMedianFiltering, resultMedianFiltering); //Salva a imagem
 
 	return resultMedianFiltering;
 	
 }
 
 //5° Binarização da imagem com otsu
-Mat bynarizationOtsu(Mat imgMedianFiltering) {
+Mat bynarizationOtsu(Mat imgMedianFiltering, String img_ext) {
 	/*Mat resultBynarizationOtsu;
 	cv::threshold(imgMedianFiltering, resultBynarizationOtsu, 0, 255, THRESH_BINARY | THRESH_OTSU);*/
 
 
 	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
+
+	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/Bynarization_Otsu_" + img_ext);
 
 	Mat resultGray, resultBynarizationOtsu;
 
@@ -278,7 +279,7 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 
 	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
 	imshow("Bynarization Otsu - OD", resultBynarizationOtsu);
-	imwrite("resultado/removal of OD/Bynarization Otsu/Bynarization Otsu2 - OD.jpg", resultBynarizationOtsu); //Salva a imagem
+	imwrite(imgBynarizationOtsu, resultBynarizationOtsu); //Salva a imagem
 
 	return resultBynarizationOtsu;
 }
@@ -292,19 +293,19 @@ Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	
 
 	//1° Converter para HSL e extrair banda L
-	//img1 = rgbForHSLAndLBand(img); 
+	img1 = rgbForHSLAndLBand(img, img_ext); 
 
 	//2° Aplicar CLAHE
-	//img2 = clahe(img1);  
+	img2 = clahe(img1, img_ext);  
 
 	//3° Contrast Stretching
-	img3 = contrastStreching(img, img_ext);
+	img3 = contrastStreching(img2, img_ext);
 
 	//4° Filtro da mediana
-	//img4 = medianFiltering(img3);
+	img4 = medianFiltering(img3, img_ext);
 	
 	//5° Binarização da imagem com otsu
-	//img5 = bynarizationOtsu(img4);
+	img5 = bynarizationOtsu(img4, img_ext);
 
 	//5° Radius enlargement
 
