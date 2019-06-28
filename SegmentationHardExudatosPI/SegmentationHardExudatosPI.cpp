@@ -140,6 +140,7 @@ Mat clahe(Mat img) {
 //3° Contrat streching 
 //https://www.programming-techniques.com/2013/01/contrast-stretching-using-c-and-opencv-image-processing.html
 //https://theailearner.com/2019/01/30/contrast-stretching/
+//https://theailearner.com/2019/01/30/contrast-stretching/
 int computeOutput(int x, int r1, int s1, int r2, int s2)
 {
 	float result;
@@ -378,21 +379,21 @@ void mostraAntes(Mat src) {
 
 int main(){
 	
-	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
+	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	//Mat src = imread("teste/hslLBandAplicar.jpg", IMREAD_GRAYSCALE);
+	Mat src = imread("teste/originalBanco.jpg");
 
 
 	Mat imgA = imread("teste/IDRiD_01.jpg", IMREAD_GRAYSCALE);
 	Mat imgB = imread("teste/IDRiD_01_OD.tif", IMREAD_GRAYSCALE);
 
 
-	namedWindow("a", WINDOW_NORMAL);
+	/*namedWindow("a", WINDOW_NORMAL);
 	imshow("a", imgA);
 
 
 	namedWindow("b", WINDOW_NORMAL);
-	imshow("b", imgB);
+	imshow("b", imgB);*/
 
 
 	if (!src.data){
@@ -402,16 +403,19 @@ int main(){
 
 	//bynarizationOtsu(imgB);
 
-	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
-	imshow("Bynarization Otsu - OD", imgB);
+	/*namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
+	imshow("Bynarization Otsu - OD", imgB);*/
+
+	namedWindow("Original", WINDOW_NORMAL);
+	imshow("original", src);
 
 	//mostraAntes(src);
 
-	//deteopticalDiscDetection(src);
+	deteopticalDiscDetection(src);
 
 	//contrastStreching(src);
 
-	multiplicacaoNormalizacao(imgA, imgB);
+	//multiplicacaoNormalizacao(imgA, imgB);
 
 
 
