@@ -238,7 +238,7 @@ Mat medianFiltering(Mat imgContratStreching) {
 
 	namedWindow("Median Filtering - OD", WINDOW_NORMAL);
 	imshow("Median Filtering - OD", resultMedianFiltering);
-	imwrite("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", resultMedianFiltering); //Salva a imagem
+	imwrite("resultado/removal of OD/Median Filtering/Median Filtering2 - OD.jpg", resultMedianFiltering); //Salva a imagem
 
 	return resultMedianFiltering;
 	
@@ -263,7 +263,7 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 
 	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
 	imshow("Bynarization Otsu - OD", resultBynarizationOtsu);
-	imwrite("resultado/removal of OD/Bynarization Otsu/Bynarization Otsu - OD.jpg", resultBynarizationOtsu); //Salva a imagem
+	imwrite("resultado/removal of OD/Bynarization Otsu/Bynarization Otsu2 - OD.jpg", resultBynarizationOtsu); //Salva a imagem
 
 	return resultBynarizationOtsu;
 }
