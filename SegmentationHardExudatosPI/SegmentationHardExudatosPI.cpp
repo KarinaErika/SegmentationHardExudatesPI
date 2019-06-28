@@ -283,7 +283,7 @@ Mat deteopticalDiscDetection(Mat img) {
 	img2 = clahe(img1);  
 
 	//3° Contrast Stretching
-	img3 = contrastStreching(img2);
+	img3 = contrastStreching2(img2);
 
 	//4° Filtro da mediana
 	img4 = medianFiltering(img3);
@@ -374,21 +374,16 @@ void multiplicacaoNormalizacao(Mat imgA, Mat imgB) {
 	imwrite("resultado/Normalizacao - multiplicacao.jpg", imgFinal01); //Salva a imagem
 }
 
-
 void mostraAntes(Mat src) {
 	namedWindow("Antes.jpg", WINDOW_AUTOSIZE);
 	imshow("Antes.jpg", src);
 }
-
 
 int main(){
 	
 	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
 	//Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
-
-
-	
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
