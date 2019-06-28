@@ -1,8 +1,10 @@
 #include "pch.h"
+#include "dirent.h"
 #include<opencv2/opencv.hpp>
 #include<iostream>
 #include "opencv2/core/core_c.h"
 #include <opencv2/imgproc.hpp>
+
 
 using namespace std;
 using namespace cv;
@@ -289,23 +291,22 @@ Mat deteopticalDiscDetection(Mat img) {
 	img1 = rgbForHSLAndLBand(img); 
 
 	//2° Aplicar CLAHE
-	img2 = clahe(img1);  
+	//img2 = clahe(img1);  
 
 	//3° Contrast Stretching
-	img3 = contrastStreching(img2);
+	//img3 = contrastStreching(img2);
 
 	//4° Filtro da mediana
-	img4 = medianFiltering(img3);
+	//img4 = medianFiltering(img3);
 	
 	//5° Binarização da imagem com otsu
-	img5 = bynarizationOtsu(img4);
+	//img5 = bynarizationOtsu(img4);
 
 	//5° Radius enlargement
 
 	return img4;
 
 }
-
 
 //Pega maior valor de uma matriz
 int maior1(vector<vector<float>> mat, Mat imgA, Mat imgB) {
@@ -388,29 +389,67 @@ void mostraAntes(Mat src) {
 	imshow("Antes.jpg", src);
 }
 
+
+void processamento(String imgpath, String path_saida) {
+
+	Mat img = imread(imgpath, IMREAD_COLOR);
+
+	deteopticalDiscDetection(img);
+	
+}
+
 int main(){
 	
 	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
+	/*Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
 		return -1;
+	}*/
+
+	//Tentando abrir todo o banco de imagens
+	
+
+	String preProcessing_path, img_ext, imgname, path_saida, imgpath;
+	vector<String> caminho;
+	struct dirent *lsdirRaiz;
+	DIR *dirRaiz;
+
+
+	//Caminho do banco
+	//caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/A. Segmentation/1. Original Images/a. Training Set/");
+	caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/base menor/");
+	//caminho.push_back("D:/MESTRADO/yolo/treino_segmentacao/original/patches/nao_esclera/");
+	//caminho.push_back("C:/Mestrado/Pesquisa/baseToda/Base_640x160/240x160/Direita e esquerda/originais/direita/RGB_direita/patch_sob/nao_esclera/");
+	//caminho.push_back("C:/Mestrado/Pesquisa/baseToda/Base_640x160/240x160/Direita e esquerda/originais/esquerda/RGB_esq/patch_sob/nao_esclera/");
+
+	//Caminho de saída
+	preProcessing_path = "C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/saida base menor";
+
+	for (int i = 0; i < caminho.size(); i++) {
+		dirRaiz = opendir(caminho[i].c_str());
+
+		while ((lsdirRaiz = readdir(dirRaiz)) != NULL) { //Enquanto o caminho não for null
+			if ((lsdirRaiz->d_namlen > 2)) { //Não pegar subpastas ocultas
+				img_ext = lsdirRaiz->d_name;
+				imgname = img_ext.substr(0, img_ext.length() - 4);
+				cout << "imagem: " << img_ext << endl;
+
+
+				imgpath = caminho[i] + img_ext;
+				path_saida = preProcessing_path + img_ext;
+
+				processamento(imgpath, path_saida);
+			}
+		}
+
+		closedir(dirRaiz);
 	}
 
-	//bynarizationOtsu(imgB);
 
-	/*namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
-	imshow("Bynarization Otsu - OD", imgB);*/
 
-	//namedWindow("Original", WINDOW_NORMAL);
-	//imshow("original", src);
-
-	mostraAntes(src);
-
-	deteopticalDiscDetection(src);
-
-	waitKey(0);
+	//waitKey(0);
 	return 0;
 }
