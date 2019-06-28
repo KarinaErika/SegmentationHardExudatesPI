@@ -191,7 +191,7 @@ Mat contrastStreching2(Mat imgCLAHE) {
 
 
 //3° Contrat streching 
-Mat contrastStreching(Mat imgCLAHE) {
+Mat contrastStreching(Mat imgCLAHE, String img_ext) {
 	Mat imgResultado = Mat::zeros(imgCLAHE.size(), imgCLAHE.type());
 	//imgCLAHE.copyTo(imgResultado);
 
@@ -223,9 +223,13 @@ Mat contrastStreching(Mat imgCLAHE) {
 		}
 	}
 
-	namedWindow("HistStretching.jpg", WINDOW_NORMAL);
+	String imgContrastStreching("resultado/removal of OD/Contrast streching/" + img_ext);
+
+	//namedWindow("HistStretching.jpg", WINDOW_NORMAL);
+	//
 	imshow("HistStretching.jpg", imgResultado);
-	imwrite("resultado/removal of OD/Contrast streching/ContrastStreching.jpg", imgResultado); //Salva a imagem
+	//imwrite("resultado/removal of OD/Contrast streching/ContrastStreching.jpg", imgResultado); //Salva a imagem
+	imwrite(imgContrastStreching, imgResultado); //Salva a imagem
 
 	return imgResultado;
 }
@@ -279,7 +283,7 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 	return resultBynarizationOtsu;
 }
 
-Mat deteopticalDiscDetection(Mat img) {
+Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	Mat img1 = Mat::zeros(img.size(), img.type());
 	Mat img2 = Mat::zeros(img.size(), img.type());
 	Mat img3 = Mat::zeros(img.size(), img.type());
@@ -288,13 +292,13 @@ Mat deteopticalDiscDetection(Mat img) {
 	
 
 	//1° Converter para HSL e extrair banda L
-	img1 = rgbForHSLAndLBand(img); 
+	//img1 = rgbForHSLAndLBand(img); 
 
 	//2° Aplicar CLAHE
 	//img2 = clahe(img1);  
 
 	//3° Contrast Stretching
-	//img3 = contrastStreching(img2);
+	img3 = contrastStreching(img, img_ext);
 
 	//4° Filtro da mediana
 	//img4 = medianFiltering(img3);
@@ -390,11 +394,11 @@ void mostraAntes(Mat src) {
 }
 
 
-void processamento(String imgpath, String path_saida) {
+void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
 
-	deteopticalDiscDetection(img);
+	deteopticalDiscDetection(img, img_ext);
 	
 }
 
@@ -441,7 +445,7 @@ int main(){
 				imgpath = caminho[i] + img_ext;
 				path_saida = preProcessing_path + img_ext;
 
-				processamento(imgpath, path_saida);
+				processamento(imgpath, path_saida, img_ext);
 			}
 		}
 
@@ -450,6 +454,6 @@ int main(){
 
 
 
-	//waitKey(0);
+	waitKey(0);
 	return 0;
 }
