@@ -119,19 +119,28 @@ Mat rgbForHSLAndLBand(Mat img) {
 //2° CLAHE
 Mat clahe(Mat img) {
 
-	//img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
-	//img.copyTo(resultado);
+	/*img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
+	img.copyTo(resultado);*/
 
-	Ptr<CLAHE> clahe = createCLAHE();
-	clahe->setClipLimit(8);
+	/*for (int i = 0; i < 8; i++)
+	{
+		for (int j = 2; j < 128; j++) {*/
 
-	Mat resultado;
+			Ptr<CLAHE> clahe = createCLAHE();
+			clahe->setClipLimit(4);
+			clahe->setTilesGridSize(Size(32, 32));
 
-	clahe->apply(img, resultado);
+			Mat resultado;
 
-	namedWindow("CLAHE - OD", WINDOW_NORMAL);
-	imshow("CLAHE - OD", resultado);
-	imwrite("resultado/removal of OD/clahe/CLAHE - OD.jpg", resultado); //Salva a imagem
+			clahe->apply(img, resultado);
+
+			namedWindow("CLAHE - OD", WINDOW_NORMAL);
+			imshow("CLAHE - OD", resultado);
+			//String str = "resultado/removal of OD/clahe/CLAHE" << i << "_" << j + ".jpg";
+			imwrite("resultado/removal of OD/clahe/CLAHE.jpg", resultado); //Salva a imagem
+		//}
+	//}
+
 
 	return resultado;
 }
@@ -205,7 +214,7 @@ Mat contrastStreching(Mat imgCLAHE) {
 			pixelSubMenor = valorPixel - menorIntensidadeOriginal;
 			contrasteEpixelSub = pixelSubMenor / dif;
 
-			z = 255 * contrasteEpixelSub;
+			z = 254 * contrasteEpixelSub;
 
 			imgResultado.at<uchar>(row, col) = z;
 
@@ -283,7 +292,7 @@ Mat deteopticalDiscDetection(Mat img) {
 	img2 = clahe(img1);  
 
 	//3° Contrast Stretching
-	img3 = contrastStreching2(img2);
+	img3 = contrastStreching(img2);
 
 	//4° Filtro da mediana
 	img4 = medianFiltering(img3);
@@ -381,9 +390,9 @@ void mostraAntes(Mat src) {
 
 int main(){
 	
-	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
+	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	//Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
+	Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
