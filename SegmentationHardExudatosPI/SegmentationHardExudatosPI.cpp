@@ -110,7 +110,7 @@ Mat rgbForHSLAndLBand(Mat img) {
 
 	/*namedWindow("hsl", WINDOW_NORMAL);
 	imshow("hsl", hsl);*/
-	imwrite("resultado/removal of OD/rgbForHSLCanalVerde.jpg", bgr[1]); //Salva a imagem
+	imwrite("resultado/removal of OD/rgbForHSLAndLBand/rgbForHSLCanalVerde.jpg", bgr[1]); //Salva a imagem
 
 	return bgr[1];
 
@@ -119,11 +119,11 @@ Mat rgbForHSLAndLBand(Mat img) {
 //2° CLAHE
 Mat clahe(Mat img) {
 
-	img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
+	//img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
 	//img.copyTo(resultado);
 
 	Ptr<CLAHE> clahe = createCLAHE();
-	clahe->setClipLimit(4);
+	clahe->setClipLimit(8);
 
 	Mat resultado;
 
@@ -131,7 +131,7 @@ Mat clahe(Mat img) {
 
 	namedWindow("CLAHE - OD", WINDOW_NORMAL);
 	imshow("CLAHE - OD", resultado);
-	imwrite("resultado/removal of OD/CLAHE - OD.jpg", resultado); //Salva a imagem
+	imwrite("resultado/removal of OD/clahe/CLAHE - OD.jpg", resultado); //Salva a imagem
 
 	return resultado;
 }
@@ -157,7 +157,7 @@ int computeOutput(int x, int r1, int s1, int r2, int s2)
 }
 
 //3° Contrast Stretching
-Mat contrastStretching2(Mat imgCLAHE) {
+Mat contrastStreching2(Mat imgCLAHE) {
 
 	Mat new_image;
 	imgCLAHE.copyTo(new_image);
@@ -173,24 +173,25 @@ Mat contrastStretching2(Mat imgCLAHE) {
 
 	namedWindow("Contrast Stretching", WINDOW_NORMAL);
 	imshow("Contrast Stretching", new_image);
-	imwrite("resultado/removal of OD/Contrast Stretching.jpg", new_image); //Salva a imagem
+	imwrite("resultado/removal of OD/Contrast streching/Contrast Stretching2.jpg", new_image); //Salva a imagem
 
 	return new_image;
 }
 
 
-
 //3° Contrat streching 
 Mat contrastStreching(Mat imgCLAHE) {
-	Mat imgResultado;
-	imgCLAHE.copyTo(imgResultado);
+	Mat imgResultado = Mat::zeros(imgCLAHE.size(), imgCLAHE.type());
+	//imgCLAHE.copyTo(imgResultado);
 
-	int z, valorPixel, dif;
+	int z = 0;
+	int valorPixel = 0;
+	int dif = 0;
 
-	int maiorIntensidadeOriginal = maior(imgCLAHE);
-	int menorIntensidadeOriginal = menor(imgCLAHE);
-	float pixelSubMenor;
-	float contrasteEpixelSub;
+	int maiorIntensidadeOriginal = 0;
+	int menorIntensidadeOriginal = 0;
+	float pixelSubMenor = 0.0;
+	float contrasteEpixelSub = 0.0;
 
 	maiorIntensidadeOriginal = maior(imgCLAHE);
 	menorIntensidadeOriginal = menor(imgCLAHE);
@@ -213,7 +214,7 @@ Mat contrastStreching(Mat imgCLAHE) {
 
 	namedWindow("HistStretching.jpg", WINDOW_NORMAL);
 	imshow("HistStretching.jpg", imgResultado);
-	imwrite("resultado/removal of OD/Contrast streching/HistStretching.jpg", imgResultado); //Salva a imagem
+	imwrite("resultado/removal of OD/Contrast streching/ContrastStreching.jpg", imgResultado); //Salva a imagem
 
 	return imgResultado;
 }
@@ -268,28 +269,31 @@ Mat bynarizationOtsu(Mat imgMedianFiltering) {
 }
 
 Mat deteopticalDiscDetection(Mat img) {
+	Mat img1 = Mat::zeros(img.size(), img.type());
+	Mat img2 = Mat::zeros(img.size(), img.type());
+	Mat img3 = Mat::zeros(img.size(), img.type());
+	Mat img4 = Mat::zeros(img.size(), img.type());
+	Mat img5 = Mat::zeros(img.size(), img.type());
+	
 
 	//1° Converter para HSL e extrair banda L
-	img = rgbForHSLAndLBand(img); 
+	img1 = rgbForHSLAndLBand(img); 
 
 	//2° Aplicar CLAHE
-	img = clahe(img);  
-
-	Mat new_image;
-	img.copyTo(new_image);
+	img2 = clahe(img1);  
 
 	//3° Contrast Stretching
-	new_image = contrastStretching2(img);
+	img3 = contrastStreching(img2);
 
 	//4° Filtro da mediana
-	new_image = medianFiltering(new_image);
+	img4 = medianFiltering(img3);
 	
 	//5° Binarização da imagem com otsu
-	new_image = bynarizationOtsu(new_image);
+	img5 = bynarizationOtsu(img4);
 
 	//5° Radius enlargement
 
-	return new_image;
+	return img4;
 
 }
 
@@ -379,22 +383,12 @@ void mostraAntes(Mat src) {
 
 int main(){
 	
-	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
+	Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
 	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	Mat src = imread("teste/originalBanco.jpg");
+	//Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
 
 
-	Mat imgA = imread("teste/IDRiD_01.jpg", IMREAD_GRAYSCALE);
-	Mat imgB = imread("teste/IDRiD_01_OD.tif", IMREAD_GRAYSCALE);
-
-
-	/*namedWindow("a", WINDOW_NORMAL);
-	imshow("a", imgA);
-
-
-	namedWindow("b", WINDOW_NORMAL);
-	imshow("b", imgB);*/
-
+	
 
 	if (!src.data){
 		cout << "Não foi possível abrir ou encontrar a imagem";
@@ -406,20 +400,12 @@ int main(){
 	/*namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
 	imshow("Bynarization Otsu - OD", imgB);*/
 
-	namedWindow("Original", WINDOW_NORMAL);
-	imshow("original", src);
+	//namedWindow("Original", WINDOW_NORMAL);
+	//imshow("original", src);
 
-	//mostraAntes(src);
+	mostraAntes(src);
 
 	deteopticalDiscDetection(src);
-
-	//contrastStreching(src);
-
-	//multiplicacaoNormalizacao(imgA, imgB);
-
-
-
-	
 
 	waitKey(0);
 	return 0;
