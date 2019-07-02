@@ -323,27 +323,43 @@ Mat detectCircle(Mat src, String img_ext) {
 void findCenter(Mat src, String img_ext) {
 	// declare Mat variables, thr, gray and src
 	Mat thr, gray;
-	/*src.copyTo(thr);
-	src.copyTo(gray);*/
+	Mat canny_output;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
 
-	// convert image to grayscale
-	cvtColor(src, gray, COLOR_BGR2GRAY);
+	// detect edges using canny
+	Canny(src, canny_output, 50, 150, 3);
 
-	// convert grayscale to binary image
-	threshold(gray, thr, 100, 255, THRESH_BINARY);
+	// find contours
+	findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-	// find moments of the image
-	Moments m = moments(thr, true);
-	Point p(m.m10 / m.m00, m.m01 / m.m00);
+	// get the moments
+	vector<Moments> mu(contours.size());
+	for (int i = 0; i < contours.size(); i++)
+	{
+		mu[i] = moments(contours[i], false);
+	}
 
-	// coordinates of centroid
-	cout << Mat(p) << endl;
+	// get the centroid of figures.
+	vector<Point2f> mc(contours.size());
+	for (int i = 0; i < contours.size(); i++)
+	{
+		mc[i] = Point2f(mu[i].m10 / mu[i].m00, mu[i].m01 / mu[i].m00);
+	}
 
-	// show the image with a point mark at the centroid
-	circle(src, p, 5, Scalar(128, 0, 0), -1);
-	namedWindow("Image with center", WINDOW_NORMAL);
-	imshow("Image with center", src);
 
+	// draw contours
+	Mat drawing(canny_output.size(), CV_8UC3, Scalar(255, 255, 255));
+	for (int i = 0; i < contours.size(); i++)
+	{
+		Scalar color = Scalar(167, 151, 0); // B G R values
+		drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
+		circle(drawing, mc[i], 4, color, -1, 8, 0);
+	}
+
+	// show the resultant image
+	namedWindow("Contours", WINDOW_AUTOSIZE);
+	imshow("Contours", drawing);
 	waitKey(0);
 }
 Mat deteopticalDiscDetection(Mat img, String img_ext) {
@@ -467,7 +483,7 @@ void processamento(String imgpath, String path_saida, String img_ext) {
 
 	//detectCircle(img, img_ext);
 
-	//findCenter(img, img_ext);
+	findCenter(img, img_ext);
 }
 
 int main() {
@@ -479,8 +495,8 @@ int main() {
 
 
 	//Caminho do banco
-	caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/ddb1_fundusimages/");
-	//caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/base menor/");
+	//caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/ddb1_fundusimages/");
+	caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/base menor/");
 	
 
 	//Caminho de saída
