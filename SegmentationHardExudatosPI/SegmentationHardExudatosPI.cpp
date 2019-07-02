@@ -58,18 +58,18 @@ Mat greenChannelExtraction(Mat img) {
 
 	//Note: OpenCV uses BGR color order
 	imwrite("green.png", bgr[1]); //green channel
-	
+
 
 
 	Mat green = imread("green.png", IMREAD_GRAYSCALE);
-	
+
 	//Abre o imagem mostrando apenas canal verde
 	namedWindow("green", WINDOW_NORMAL);
 	imshow("green", green);
 	imwrite("resultado/Canal verde - exudatos.jpg", green); //Salva a imagem
 
 	return green;
-	
+
 }
 
 //2° Aplicação da operação de complemento, pois áreas claras tornam-se mais escuras, enquanto as áreas escuras ficam mais claras na imagem de saída.
@@ -96,22 +96,22 @@ Mat complementOperation(Mat img) {
 //1° rgb para hsl e extrair a banda L
 Mat rgbForHSLAndLBand(Mat img, String img_ext) {
 
-	String imgRgbForHSLAndLBand("resultado/removal of OD/1. Convert To HSL And extracted L Band/rgbForHSLAndLBand_" + img_ext);
-	Mat hsl;
+	Mat hsl = Mat::zeros(img.size(), img.type());
 
 	cvtColor(img, hsl, COLOR_RGB2HLS);
 	Mat bgr[3];   //destination array
 	split(hsl, bgr);//fonte dividida  
 
 	//Salva a imagem
-	imwrite(imgRgbForHSLAndLBand, bgr[1]); 
+	String imgRgbForHSLAndLBand("resultado/removal of OD/1. Convert To HSL And extracted L Band/rgbForHSLAndLBand_" + img_ext);
+	imwrite(imgRgbForHSLAndLBand, bgr[1]);
 
 	//Salva a imagem em escala de cinza
-	Mat green = imread(imgRgbForHSLAndLBand, IMREAD_GRAYSCALE); 
+	Mat green = imread(imgRgbForHSLAndLBand, IMREAD_GRAYSCALE);
 
 	//Abre o imagem mostrando apenas canal verde
-	namedWindow("L Band", WINDOW_NORMAL);
-	imshow("L Band", green);
+	/*namedWindow("L Band", WINDOW_NORMAL);
+	imshow("L Band", green);*/
 
 	return green;
 
@@ -120,8 +120,6 @@ Mat rgbForHSLAndLBand(Mat img, String img_ext) {
 //2° CLAHE
 Mat clahe(Mat img, String img_ext) {
 
-	String imgClahe("resultado/removal of OD/2. CLAHE/CLAHE_" + img_ext);
-
 	/*img = imread("resultado/removal of OD/rgbForHSLCanalVerde.jpg", IMREAD_GRAYSCALE);
 	img.copyTo(resultado);*/
 
@@ -129,20 +127,23 @@ Mat clahe(Mat img, String img_ext) {
 	{
 		for (int j = 2; j < 128; j++) {*/
 
-			Ptr<CLAHE> clahe = createCLAHE();
-			clahe->setClipLimit(4);
-			clahe->setTilesGridSize(Size(32, 32));
+	Ptr<CLAHE> clahe = createCLAHE();
+	clahe->setClipLimit(4);
+	clahe->setTilesGridSize(Size(32, 32));
 
-			Mat resultado;
+	Mat resultado;
 
-			clahe->apply(img, resultado);
+	clahe->apply(img, resultado);
 
-			namedWindow("CLAHE - OD", WINDOW_NORMAL);
-			imshow("CLAHE - OD", resultado);
-			
-			imwrite(imgClahe, resultado); //Salva a imagem
-		//}
+	//Mostra a imagem resultante
+	/*namedWindow("CLAHE - OD", WINDOW_NORMAL);
+	imshow("CLAHE - OD", resultado);*/
+
+	//Salva a imagem
+	String imgClahe("resultado/removal of OD/2. CLAHE/CLAHE_" + img_ext);
+	imwrite(imgClahe, resultado);
 	//}
+//}
 
 
 	return resultado;
@@ -183,9 +184,12 @@ Mat contrastStreching2(Mat imgCLAHE, String img_ext) {
 		}
 	}
 
-	namedWindow("Contrast Stretching", WINDOW_NORMAL);
-	imshow("Contrast Stretching", new_image);
-	imwrite(imgContrastStreching2, new_image); //Salva a imagem
+	//Mostra o resultado da imagem
+	/*namedWindow("Contrast Stretching", WINDOW_NORMAL);
+	imshow("Contrast Stretching", new_image);*/
+
+	//Salva a imagem
+	imwrite(imgContrastStreching2, new_image);
 
 	return new_image;
 }
@@ -224,15 +228,16 @@ Mat contrastStreching(Mat imgCLAHE, String img_ext) {
 		}
 	}
 
-	
-	namedWindow("Contrast streching.jpg", WINDOW_NORMAL);
-	imshow("Contrast streching.jpg", imgResultado);
+	//Mostra a imagem resultante
+	//namedWindow("Contrast streching.jpg", WINDOW_NORMAL);
+	//imshow("Contrast streching.jpg", imgResultado);
+
 	imwrite(imgContrastStreching, imgResultado); //Salva a imagem
 
 	return imgResultado;
 }
 
-int display_dst(int delay){
+int display_dst(int delay) {
 	int c = waitKey(delay);
 	if (c >= 0) { return -1; }
 	return 0;
@@ -243,71 +248,100 @@ Mat medianFiltering(Mat imgContratStreching, String img_ext) {
 	Mat resultMedianFiltering;
 	String imgMedianFiltering("resultado/removal of OD/4. Median Filtering/Median_Filtering_" + img_ext);
 
-	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2){
+	for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2) {
 		medianBlur(imgContratStreching, resultMedianFiltering, i);
-		if (display_dst(DELAY_BLUR) != 0) { 
+		if (display_dst(DELAY_BLUR) != 0) {
 			break;
 		}
 	}
 
-	namedWindow("Median Filtering - OD", WINDOW_NORMAL);
-	imshow("Median Filtering - OD", resultMedianFiltering);
-	imwrite(imgMedianFiltering, resultMedianFiltering); //Salva a imagem
+	//Salva a imagem
+	imwrite(imgMedianFiltering, resultMedianFiltering);
+
+	//Mostra o resultado da imagem
+	/*namedWindow("Median Filtering - OD", WINDOW_NORMAL);
+	imshow("Median Filtering - OD", resultMedianFiltering);*/
 
 	return resultMedianFiltering;
-	
+
 }
 
 //5° Binarização da imagem com otsu
 Mat bynarizationOtsu(Mat imgMedianFiltering, String img_ext) {
-	/*Mat resultBynarizationOtsu;
-	cv::threshold(imgMedianFiltering, resultBynarizationOtsu, 0, 255, THRESH_BINARY | THRESH_OTSU);*/
-
-
-	//Mat theFrame = imread("teste/otsu.jpg"); // opencv
-
-	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/Bynarization_Otsu_" + img_ext);
 
 	Mat resultGray, resultBynarizationOtsu;
 
 	imgMedianFiltering.copyTo(resultGray);
 	imgMedianFiltering.copyTo(resultBynarizationOtsu);
-	//cvtColor(imgMedianFiltering, resultGray, cv::COLOR_RGB2GRAY);
+
 	threshold(resultGray, resultBynarizationOtsu, 100, 255, THRESH_BINARY | THRESH_OTSU);
-	//imwrite("result.jpg", binary);
 
+	//Salva a imagem
+	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/Bynarization_Otsu_" + img_ext);
+	imwrite(imgBynarizationOtsu, resultBynarizationOtsu);
 
-	namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
-	imshow("Bynarization Otsu - OD", resultBynarizationOtsu);
-	imwrite(imgBynarizationOtsu, resultBynarizationOtsu); //Salva a imagem
+	//Mostra o resultado da imagem
+	/*namedWindow("Bynarization Otsu - OD", WINDOW_NORMAL);
+	imshow("Bynarization Otsu - OD", resultBynarizationOtsu);*/
 
 	return resultBynarizationOtsu;
 }
 
+//6° Radius enlargement 
+Mat detectCircle(Mat src, String img_ext) {
+	Mat gray;
+	cvtColor(src, gray, COLOR_BGR2GRAY);
+	medianBlur(gray, gray, 5);
+	vector<Vec3f> circles;
+	HoughCircles(gray, circles, HOUGH_GRADIENT, 1,
+		gray.rows / 16,  // change this value to detect circles with different distances to each other
+		100, 30, 1, 30 // change the last two parameters
+   // (min_radius & max_radius) to detect larger circles
+	);
+	for (size_t i = 0; i < circles.size(); i++)
+	{
+		Vec3i c = circles[i];
+		Point center = Point(c[0], c[1]);
+		// circle center
+		circle(src, center, 1, Scalar(0, 100, 100), 3, LINE_AA);
+		// circle outline
+		int radius = c[2];
+		circle(src, center, radius, Scalar(255, 0, 255), 3, LINE_AA);
+	}
+	imshow("detected circles", src); //Mostra a imagem
+
+	//Salva a imagem
+	String imgRadiusEnlargement("resultado/removal of OD/6. Radius Enlargement/Radius_" + img_ext);
+	imwrite(imgRadiusEnlargement, src);
+
+	return src;
+}
 Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	Mat img1 = Mat::zeros(img.size(), img.type());
 	Mat img2 = Mat::zeros(img.size(), img.type());
 	Mat img3 = Mat::zeros(img.size(), img.type());
 	Mat img4 = Mat::zeros(img.size(), img.type());
 	Mat img5 = Mat::zeros(img.size(), img.type());
-	
+	Mat img6 = Mat::zeros(img.size(), img.type());
+
 
 	//1° Converter para HSL e extrair banda L
-	img1 = rgbForHSLAndLBand(img, img_ext); 
+	img1 = rgbForHSLAndLBand(img, img_ext);
 
 	//2° Aplicar CLAHE
-	img2 = clahe(img1, img_ext);  
+	img2 = clahe(img1, img_ext);
 
 	//3° Contrast Stretching
-	img3 = contrastStreching(img2, img_ext);
+	img3 = contrastStreching2(img2, img_ext);
 
 	//4° Filtro da mediana
 	img4 = medianFiltering(img3, img_ext);
-	
+
 	//5° Binarização da imagem com otsu
 	img5 = bynarizationOtsu(img4, img_ext);
 
 	//5° Radius enlargement
+	img6 = detectCircle(img5, img_ext);
 
 	return img4;
 
@@ -399,23 +433,13 @@ void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
 
-	deteopticalDiscDetection(img, img_ext);
-	
+	//deteopticalDiscDetection(img, img_ext);
+
+	detectCircle(img, img_ext);
+
 }
 
-int main(){
-	
-	//Mat src = imread("IDRID/A. Segmentation/1. Original Images/a. Training Set/IDRiD_47.jpg");
-	//Mat src = imread("resultado/removal of OD/Median Filtering/Median Filtering - OD.jpg", IMREAD_GRAYSCALE);
-	/*Mat src = imread("teste/originalBanco.jpg",IMREAD_COLOR);
-
-	if (!src.data){
-		cout << "Não foi possível abrir ou encontrar a imagem";
-		return -1;
-	}*/
-
-	//Tentando abrir todo o banco de imagens
-	
+int main() {
 
 	String preProcessing_path, img_ext, imgname, path_saida, imgpath;
 	vector<String> caminho;
@@ -424,11 +448,9 @@ int main(){
 
 
 	//Caminho do banco
+	caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/circle/");
+	//caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/base menor/");
 	//caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/A. Segmentation/1. Original Images/a. Training Set/");
-	caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/base menor/");
-	//caminho.push_back("D:/MESTRADO/yolo/treino_segmentacao/original/patches/nao_esclera/");
-	//caminho.push_back("C:/Mestrado/Pesquisa/baseToda/Base_640x160/240x160/Direita e esquerda/originais/direita/RGB_direita/patch_sob/nao_esclera/");
-	//caminho.push_back("C:/Mestrado/Pesquisa/baseToda/Base_640x160/240x160/Direita e esquerda/originais/esquerda/RGB_esq/patch_sob/nao_esclera/");
 
 	//Caminho de saída
 	preProcessing_path = "C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/saida base menor";
