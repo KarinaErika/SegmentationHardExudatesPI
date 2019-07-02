@@ -459,7 +459,7 @@ int main() {
 		dirRaiz = opendir(caminho[i].c_str());
 
 		while ((lsdirRaiz = readdir(dirRaiz)) != NULL) { //Enquanto o caminho não for null
-			if ((lsdirRaiz->d_namlen > 2)) { //Não pegar subpastas ocultas
+			if ((lsdirRaiz->d_namlen > 2)) { //Não pegar subpastas ocultas 
 				img_ext = lsdirRaiz->d_name;
 				imgname = img_ext.substr(0, img_ext.length() - 4);
 				cout << "imagem: " << img_ext << endl;
