@@ -316,6 +316,36 @@ Mat detectCircle(Mat src, String img_ext) {
 
 	return src;
 }
+
+//Find the Center of a Blob (Centroid) using OpenCV (C++/Python)
+//https://www.learnopencv.com/find-center-of-blob-centroid-using-opencv-cpp-python/
+
+void findCenter(Mat src, String img_ext) {
+	// declare Mat variables, thr, gray and src
+	Mat thr, gray;
+	/*src.copyTo(thr);
+	src.copyTo(gray);*/
+
+	// convert image to grayscale
+	cvtColor(src, gray, COLOR_BGR2GRAY);
+
+	// convert grayscale to binary image
+	threshold(gray, thr, 100, 255, THRESH_BINARY);
+
+	// find moments of the image
+	Moments m = moments(thr, true);
+	Point p(m.m10 / m.m00, m.m01 / m.m00);
+
+	// coordinates of centroid
+	cout << Mat(p) << endl;
+
+	// show the image with a point mark at the centroid
+	circle(src, p, 5, Scalar(128, 0, 0), -1);
+	namedWindow("Image with center", WINDOW_NORMAL);
+	imshow("Image with center", src);
+
+	waitKey(0);
+}
 Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	Mat img1 = Mat::zeros(img.size(), img.type());
 	Mat img2 = Mat::zeros(img.size(), img.type());
@@ -341,7 +371,7 @@ Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	img5 = bynarizationOtsu(img4, img_ext);
 
 	//5° Radius enlargement
-	img6 = detectCircle(img5, img_ext);
+	//img6 = detectCircle(img5, img_ext);
 
 	return img4;
 
@@ -433,10 +463,11 @@ void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
 
-	//deteopticalDiscDetection(img, img_ext);
+	deteopticalDiscDetection(img, img_ext);
 
-	detectCircle(img, img_ext);
+	//detectCircle(img, img_ext);
 
+	//findCenter(img, img_ext);
 }
 
 int main() {
@@ -448,9 +479,9 @@ int main() {
 
 
 	//Caminho do banco
-	caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/circle/");
-	//caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/base menor/");
-	//caminho.push_back("C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/A. Segmentation/1. Original Images/a. Training Set/");
+	caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/ddb1_fundusimages/");
+	//caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/base menor/");
+	
 
 	//Caminho de saída
 	preProcessing_path = "C:/Users/Karina/source/repos/SegmentationHardExudatosPI/SegmentationHardExudatosPI/IDRID/saida base menor";
