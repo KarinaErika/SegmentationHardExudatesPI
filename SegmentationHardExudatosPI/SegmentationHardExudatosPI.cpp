@@ -469,12 +469,6 @@ void multiplicacaoNormalizacao(Mat imgA, Mat imgB) {
 	imwrite("resultado/Normalizacao - multiplicacao.jpg", imgFinal01); //Salva a imagem
 }
 
-void mostraAntes(Mat src) {
-	namedWindow("Antes.jpg", WINDOW_AUTOSIZE);
-	imshow("Antes.jpg", src);
-}
-
-
 void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
