@@ -276,7 +276,7 @@ Mat bynarizationOtsu(Mat imgMedianFiltering, String img_ext) {
 	threshold(imgMedianFiltering, resultBynarizationOtsu, 0, 255, THRESH_BINARY | THRESH_OTSU);
 
 	//Salva a imagem
-	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/diaretdb1_v_1_1/1Bynarization_Otsu_" + img_ext);
+	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/Bynarization_Otsu_" + img_ext);
 	imwrite(imgBynarizationOtsu, resultBynarizationOtsu);
 
 	//Mostra o resultado da imagem
@@ -392,7 +392,7 @@ Mat deteopticalDiscDetection(Mat img, String img_ext) {
 
 	//5° Radius enlargement
 	//img6 = detectCircle(img5, img_ext);
-	findCenter(img5, img_ext);
+	//findCenter(img5, img_ext);
 
 	return img4;
 
@@ -403,9 +403,8 @@ void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
 
-	//deteopticalDiscDetection(img, img_ext);
-
-	
+	deteopticalDiscDetection(img, img_ext);
+	//detectCircle(img, img_ext); //Encontrou um pedaço disco
 
 }
 
@@ -419,7 +418,8 @@ int main() {
 
 	//Caminho do banco
 	//caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/diaretdb1_v_1_1/resources/images/ddb1_fundusimages/");
-	caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/base menor/");
+	caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/A. Segmentation/1. Original Images/a. Training Set/");
+	//caminho.push_back("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/IDRID/base menor/");
 	
 
 	//Caminho de saída
