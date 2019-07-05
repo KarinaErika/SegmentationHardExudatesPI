@@ -22,5 +22,7 @@ Steps for Segmentation of hard exudates [1]
 
 For more information about methodology, consult the paste "methodology" this repository.
 
+https://drive.google.com/open?id=1xpaUvo5qgvEXvbp85ykk_RgmWSaGlVzH
+
 
 
