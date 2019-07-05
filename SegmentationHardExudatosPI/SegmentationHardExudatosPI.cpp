@@ -269,15 +269,14 @@ Mat medianFiltering(Mat imgContratStreching, String img_ext) {
 //5° Binarização da imagem com otsu
 Mat bynarizationOtsu(Mat imgMedianFiltering, String img_ext) {
 
-	Mat resultGray, resultBynarizationOtsu;
+	//Mat imgMedianFiltering = imread("C:/Users/Karina/source/repos/KarinaErika/SegmentationHardExudatesPI/SegmentationHardExudatosPI/teste/resultcontrast.jpg", IMREAD_GRAYSCALE);
 
-	imgMedianFiltering.copyTo(resultGray);
-	imgMedianFiltering.copyTo(resultBynarizationOtsu);
-
-	threshold(resultGray, resultBynarizationOtsu, 100, 255, THRESH_BINARY | THRESH_OTSU);
+	Mat resultBynarizationOtsu = Mat::zeros(imgMedianFiltering.size(), imgMedianFiltering.type());
+	
+	threshold(imgMedianFiltering, resultBynarizationOtsu, 0, 255, THRESH_BINARY | THRESH_OTSU);
 
 	//Salva a imagem
-	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/Bynarization_Otsu_" + img_ext);
+	String imgBynarizationOtsu("resultado/removal of OD/5. Bynarization Otsu/diaretdb1_v_1_1/1Bynarization_Otsu_" + img_ext);
 	imwrite(imgBynarizationOtsu, resultBynarizationOtsu);
 
 	//Mostra o resultado da imagem
@@ -358,10 +357,15 @@ void findCenter(Mat src, String img_ext) {
 	}
 
 	// show the resultant image
-	namedWindow("Contours", WINDOW_AUTOSIZE);
-	imshow("Contours", drawing);
-	waitKey(0);
+	/*namedWindow("Contours", WINDOW_AUTOSIZE);
+	imshow("Contours", drawing);*/
+
+	String imgRadiusEnlargement("resultado/removal of OD/6. Radius Enlargement/Radius_" + img_ext);
+	imwrite(imgRadiusEnlargement, drawing);
+
+	//waitKey(0);
 }
+
 Mat deteopticalDiscDetection(Mat img, String img_ext) {
 	Mat img1 = Mat::zeros(img.size(), img.type());
 	Mat img2 = Mat::zeros(img.size(), img.type());
@@ -388,96 +392,21 @@ Mat deteopticalDiscDetection(Mat img, String img_ext) {
 
 	//5° Radius enlargement
 	//img6 = detectCircle(img5, img_ext);
+	findCenter(img5, img_ext);
 
 	return img4;
 
 }
 
-//Pega maior valor de uma matriz
-int maior1(vector<vector<float>> mat, Mat imgA, Mat imgB) {
-
-	int maior = mat[0][0];
-
-	for (int row = 0; row < imgA.rows; row++) {
-		for (int col = 0; col < imgA.cols; col++) {
-			if (mat[row][col] > maior) {
-				maior = mat[row][col];
-			}
-		}
-	}
-	return maior;
-
-}
-
-//Pega menor valor de uma matriz
-int menor1(vector<vector<float>> mat, Mat imgA, Mat imgB) {
-
-	int menor = mat[0][0];
-
-	for (int row = 0; row < imgA.rows; row++) {
-		for (int col = 0; col < imgA.cols; col++) {
-			if (mat[row][col] < menor) {
-				menor = mat[row][col];
-			}
-		}
-	}
-	return menor;
-}
-
-//Realizar a multiplicação para remover o disco ópitico da imagem
-void multiplicacaoNormalizacao(Mat imgA, Mat imgB) {
-
-	float y;
-	int z;
-
-	y = 350 - 45;
-	z = (255 / y) * (300 - 45);
-
-	Mat imgFinal01;
-	imgA.copyTo(imgFinal01);
-	int k;
-	int maiorValor = 0, menorValor = 0;
-	vector<vector<float>> mat(imgA.rows, vector<float>(imgA.cols));
-
-	//Copia na matriz mat os valores da soma de imgA e imgB
-	for (int row = 0; row < imgA.rows; row++) {
-		for (int col = 0; col < imgA.cols; col++) {
-			k = (int)imgA.at<uchar>(row, col) * (int)imgB.at<uchar>(row, col);
-			if (k = 0)
-				mat[row][col] = (int)imgA.at<uchar>(row, col);
-			else
-				mat[row][col] = k;
-
-		}
-	}
-
-	maiorValor = maior1(mat, imgA, imgB);
-	menorValor = menor1(mat, imgA, imgB);
-
-	y = maiorValor - menorValor;
-	//Faz a normalização
-	for (int row = 0; row < imgA.rows; row++) {
-		for (int col = 0; col < imgA.cols; col++) {
-			z = (255 / y) * (mat[row][col] - menorValor); //Fómula para normalização
-
-			imgFinal01.at<uchar>(row, col) = z;
-		}
-	}
-
-	namedWindow("Normalizacao - multiplicacao", WINDOW_AUTOSIZE);
-	imshow("Normalizacao - multiplicacao", imgFinal01);
-	imwrite("resultado/Normalizacao - multiplicacao.jpg", imgFinal01); //Salva a imagem
-}
 
 void processamento(String imgpath, String path_saida, String img_ext) {
 
 	Mat img = imread(imgpath, IMREAD_COLOR);
 
-	deteopticalDiscDetection(img, img_ext);
+	//deteopticalDiscDetection(img, img_ext);
 
-	//detectCircle(img, img_ext);
+	
 
-	findCenter(img, img_ext);
 }
 
 int main() {
